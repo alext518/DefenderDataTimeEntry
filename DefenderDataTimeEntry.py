@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup as bs
 from datetime import datetime
 import time
 from FileManagement import logResult, getTimeDataPath, read_time_data as fm
-from Task import Task as Task
+from Task import Task
 from TimeEntry import TimeEntry as te
 
 # class Task:
