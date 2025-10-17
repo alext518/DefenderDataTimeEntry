@@ -1,16 +1,10 @@
-from sys import orig_argv
 from pandas import pandas as pd
 from selenium import webdriver as wd
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
 from datetime import datetime
-import time
 from FileManagement import logResult, getTimeDataPath, read_time_data
 from Task import Task
 from TimeEntry import TimeEntry as te
-from WebInteraction import login, click_toolbar_button_by_layout_id, click_toolbar_button_timesheet_clear, click_toolbar_button_delete, add_new_time_row, check_for_error
+from WebInteraction import login, click_toolbar_button_timesheet_clear, click_toolbar_button_delete, check_for_error
 from Attorney import Attorney
 
 def setup_webdriver(attorney):
