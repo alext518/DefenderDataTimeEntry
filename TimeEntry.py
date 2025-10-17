@@ -1,3 +1,5 @@
+from math import isnan
+from WebInteraction import check_for_error, click_toolbar_button_timesheet_clear
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -5,11 +7,12 @@ from selenium.webdriver.common.keys import Keys
 import time
 
 class TimeEntry:
-    def __init__(self, date, Task, duration, caseNum, originalString):
+    def __init__(self, date, Task, duration, caseNum, notes, originalString):
         self.date = date
         self.Task = Task
         self.duration = duration
         self.caseNum = caseNum
+        self.notes = notes
         self.originalString = originalString
 
     def saveEntry(self, file_name):
@@ -27,6 +30,7 @@ class TimeEntry:
             rowcount = None
             while True:
                 try:
+                    time.sleep(2)
                     recordtable = driver.find_element(By.XPATH, parent_xpath)
                     rowcount = recordtable.get_attribute("rowcount")
                     if rowcount == '1':
@@ -111,12 +115,25 @@ class TimeEntry:
                 except Exception as e:
                     print(f"Error finding task code input on case {self.caseNum}: {e}")
                     return False
+
+            if self.notes == "":
+                pass # No notes to add
             else:
-                click_toolbar_button_timesheet_clear(driver) # Click save and clear button after timesheet opens up
-                if check_for_error(driver): # Check for any errors
+                try:
+                    notes_input = row.find_element(By.CSS_SELECTOR, "textarea.col.txtinput.timenotes2")
+                    notes_input.clear()
+                    notes_input.send_keys(self.notes)
+                    #notes_input.send_keys(Keys.TAB) # Tab to next field
+                    time.sleep(1) # Let the tab complete and next field load
+                except Exception as e:
+                    print(f"Error finding notes input on case {self.caseNum}: {e}")
                     return False
-                else:
-                    return True
+
+            click_toolbar_button_timesheet_clear(driver) # Click save and clear button after timesheet opens up
+            if check_for_error(driver): # Check for any errors
+                return False
+            else:
+                return True
 
             # Retry clicking the toolbar button to handle stale element exceptions
             for attempt in range(3):

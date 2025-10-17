@@ -33,7 +33,7 @@ class Task:
                 break;
 
         if code_found == False: # Map it and append to code file
-            print(f"\nTask code '{tcode}' not found in existing codes. Please map it.")
+            print(f"\nTask code '{curr_code_desc}' not found in existing codes. Please map it.")
             print("Available Task Codes:")
             for idx, code in enumerate(tcodes):
                 print(f"{idx}: {code}")
@@ -49,5 +49,5 @@ class Task:
 
             self.taskCode = tcodes[int(code_index)]
             with open(codes_filename, "a", encoding="utf-8") as codes_file:
-                codes_file.write(f"{tcode},{code_index},{type_index}\n")
-                print(f"Added new task code mapping: {tcode},{code_index},{type_index}")
+                codes_file.write(f"{curr_code_desc},{code_index},{type_index}\n")
+                print(f"Added new task code mapping: {curr_code_desc},{code_index},{type_index}")

@@ -25,11 +25,6 @@ def login(driver, attorney):
     click_toolbar_button_by_layout_id(driver, '5028') # Click the time entry button
     time.sleep(10) # Letting time entry page load
 
-    # Navigate to the time entry screen after logging in
-    input("Press Enter to continue when logged in...")
-    click_toolbar_button_by_layout_id(driver, '5028') # Click the time entry button
-    time.sleep(10) # Letting time entry page load
-
 def click_toolbar_button_by_layout_id(driver, layout_id, timeout=10):
     """
     Clicks a toolbar button based on its layoutId in the controlinit attribute.
