@@ -26,6 +26,25 @@
     <Compile Include="Task.py" />
     <Compile Include="TimeEntry.py" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Dane\" />
+    <Folder Include="Shelby\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Dane\current_time_report_final.csv" />
+    <Content Include="Dane\current_time_report_final_done.csv" />
+    <Content Include="Dane\Failed_Entries_2025-10-08.csv" />
+    <Content Include="Dane\Failed_Entries_2025-10-09.csv" />
+    <Content Include="Dane\Successful_Entries_2025-10-08.csv" />
+    <Content Include="Dane\Successful_Entries_2025-10-09.csv" />
+    <Content Include="Shelby\Failed_Entries_2025-10-07.csv" />
+    <Content Include="Shelby\Failed_Entries_2025-10-08.csv" />
+    <Content Include="Shelby\SHELBY_TIME_JUNE_FINAL.csv" />
+    <Content Include="Shelby\shelby_time_report_september.xlsx" />
+    <Content Include="Shelby\shelby_time_report_september_final.csv" />
+    <Content Include="Shelby\Successful_Entries_2025-10-07.csv" />
+    <Content Include="Shelby\Successful_Entries_2025-10-08.csv" />
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
        Visual Studio and specify your pre- and post-build commands in
