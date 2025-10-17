@@ -2,10 +2,11 @@ class Task:
     def __init__(self, taskCode):
         self.taskCode = taskCode
         self.taskType = ""
+        self.convert_task_code_entries()
 
     def convert_task_code_entries(self):
-        tcode = Task.taskCode
-        ttype = Task.taskType
+        tcode = self.taskCode
+        ttype = self.taskType
         # Code list format will be this: "Task Description string,tcodes index pos,ttypes index pos"
         current_codes = []
         tcodes = ["In Court", "In Court Waiting", "Out Of Court"]
@@ -16,9 +17,6 @@ class Task:
         except FileExistsError: # If it already exits, read the contents
             with open(codes_filename, "r", encoding="utf-8") as codes_file:
                 current_codes.extend([line.strip() for line in codes_file])
-        # with open(codes_filename, "a", encoding="utf-8") as codes_file:
-        #     current_codes.append(codes_file.read().splitlines())
-
         # Try to see if we have code mapped already
         code_found = False
         for code in current_codes:
@@ -30,8 +28,8 @@ class Task:
                 continue
             else:
                 code_found = True
-                Task.taskCode = tcodes[int(curr_code_code)]
-                Task.taskType = ttypes[int(curr_code_type)] if ttypes[int(curr_code_type)] != '-1' else ""
+                self.taskCode = tcodes[int(curr_code_code)]
+                self.taskType = ttypes[int(curr_code_type)] if ttypes[int(curr_code_type)] != '-1' else ""
                 break;
 
         if code_found == False: # Map it and append to code file
@@ -45,11 +43,11 @@ class Task:
                 for idx, ttype in enumerate(ttypes):
                     print(f"{idx}: {ttype}")
                 type_index = input("Enter the index number for the appropriate Task Type: ")
-                Task.taskType = ttypes[int(type_index)]
+                self.taskType = ttypes[int(type_index)]
             else:
                 type_index = -1 # Indicate we don't need type for things in court
 
-            Task.taskCode = tcodes[int(code_index)]
+            self.taskCode = tcodes[int(code_index)]
             with open(codes_filename, "a", encoding="utf-8") as codes_file:
                 codes_file.write(f"{tcode},{code_index},{type_index}\n")
                 print(f"Added new task code mapping: {tcode},{code_index},{type_index}")

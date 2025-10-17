@@ -5,25 +5,20 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import time
 
-def login(driver, name):
+def login(driver, attorney):
     WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.ID, 'userid'))
     )
     username_input = driver.find_element(By.ID, 'userid')
-    username_input.clear()
-    if name == "Shelby":
-        username_input.send_keys('Stowne')  # Pass the username
-    if name == "Dane":
-        username_input.send_keys('DPeddicord')  # Pass the username
-
     password_input = driver.find_element(By.ID, 'password')
+
+    username_input.clear()
     password_input.clear()
-    if name == "Shelby":
-        password_input.send_keys('Mary-Elizabeth2024!')  # Pass the password
-    if name == "Dane":
-        password_input.send_keys('Gremlin12!')
-    
-        time.sleep(3)
+
+    username_input.send_keys(attorney.username)  # Pass the username
+    password_input.send_keys(attorney.password)  # Pass the password
+
+    time.sleep(3)
     password_input.send_keys(Keys.RETURN) # Press Enter to submit the form
 
     # Navigate to the time entry screen after logging in

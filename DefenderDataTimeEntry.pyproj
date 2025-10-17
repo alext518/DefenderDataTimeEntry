@@ -21,6 +21,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Attorney.py" />
     <Compile Include="DefenderDataTimeEntry.py" />
     <Compile Include="FileManagement.py" />
     <Compile Include="Task.py" />
