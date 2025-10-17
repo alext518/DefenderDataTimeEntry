@@ -9,8 +9,8 @@
 *.user
 *.userosscache
 *.sln.docstates
-Dane/*
-Shelby/*
+Dane\*
+Shelby\*
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
@@ -362,3 +362,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Dane/current_time_report_final.csv
