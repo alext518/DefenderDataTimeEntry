@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from FileManagement import logResult
 import time
 
 class TimeEntry:
@@ -84,14 +85,7 @@ class TimeEntry:
             WebDriverWait(driver, 10).until(
                 EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))
             )
-            # except TimeEntryException as e:
-            #     print(f"TimeEntryException: {e.message}")
-            #     return False
-            # except Exception as e:
-            #     print(f"Error finding case number input on case {self.caseNum}: {e}")
-            #     return False
-
-            # remove individual try/catch to see if main try/catch will pick it up as expected
+            
             task_code_input = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col4d")
             if not task_code_input:
                 raise TimeEntryException(f"Task code input not found/loaded for {self.caseNum}")
@@ -141,6 +135,7 @@ class TimeEntry:
 
         except TimeEntryException as e:
             print(f"TimeEntryException: {e.message}")
+            logResult("TimeEntry_Log.txt", f"TimeEntryException: {e.message}\n")
             return False
         except Exception as e:
             print(f"Error with site on case {self.caseNum}: {e}")
@@ -148,4 +143,6 @@ class TimeEntry:
 
 class TimeEntryException(Exception):
     """Custom exception for TimeEntry errors."""
+    def __init__(self, message):
+        self.message = message
     pass

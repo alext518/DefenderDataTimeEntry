@@ -49,9 +49,11 @@ click_toolbar_button_timesheet_clear(driver) # Clear timesheet to one row after 
 date_str = datetime.now().date().isoformat()
 for entry in time_list:
     if entry.add_time_entry(driver) and not check_for_error(driver):
-        logResult(f"Entry_Success_{date_str}", f"{datetime.now()}: Added time entry for {entry.date}, {entry.Task.taskCode}, {entry.duration}, {entry.caseNum}\n")
+        logResult(f"Entry_Success_{date_str}.txt", f"{datetime.now()}: Added time entry for {entry.date}, {entry.Task.taskCode}, {entry.duration}, {entry.caseNum}\n")
+        logResult(f"TimeEntry_Log.txt", f"{datetime.now()}: Added time entry for {entry.date}, {entry.Task.taskCode}, {entry.duration}, {entry.caseNum}\n")
         entry.saveEntry(f"{attorney.name}\\Successful_Entries_{date_str}.csv") # Save successful entry to file for processing later
     else:
-        logResult(f"Entry_Failure_{date_str}", f"{datetime.now()}: Time entry failed to be added for {entry.date}, {entry.Task.taskCode}, {entry.duration}, {entry.caseNum}\n")
+        logResult(f"Entry_Failure_{date_str}.txt", f"{datetime.now()}: Time entry failed to be added for {entry.date}, {entry.Task.taskCode}, {entry.duration}, {entry.caseNum}\n")
+        logResult(f"TimeEntry_Log.txt", f"{datetime.now()}: Time entry failed to be added for {entry.date}, {entry.Task.taskCode}, {entry.duration}, {entry.caseNum}\n")
         entry.saveEntry(f"{attorney.name}\\Failed_Entries_{date_str}.csv") # Save failed entry to file for processing later
         click_toolbar_button_delete(driver) # Delete the failed entry row
