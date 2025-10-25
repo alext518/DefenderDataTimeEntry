@@ -46,24 +46,15 @@ class TimeEntry:
             # Find the specific child row we're adding
             row_xpath = f"//div[@cid='{rowcount}']" # Figure out which row we're editing using the last count in the row
             row = recordtable.find_element(By.XPATH, row_xpath)
-            task_type_input = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col11d")
-            try:
-                date_field = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col1d")
-                if not date_field:
-                    raise TimeEntryException(f"Date field not found/loaded for {self.caseNum}")
-                else:
-                    date_field.clear() # Clear default date value
-                    date_field.send_keys(self.date) # Send out date value
-                    date_field.send_keys(Keys.TAB)
-                    time.sleep(1) # Let the tab complete and next field load
-            except TimeEntryException as e:
-                print(f"TimeEntryException: {e.message}")
-                return False
-            except Exception as e:
-                print(f"Error with date input field on case {self.caseNum}: {e}")
-                return False
+            date_field = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col1d")
+            if not date_field:
+                raise TimeEntryException(f"Date field not found/loaded for {self.caseNum}")
+            else:
+                date_field.clear() # Clear default date value
+                date_field.send_keys(self.date) # Send out date value
+                date_field.send_keys(Keys.TAB)
+                time.sleep(1) # Let the tab complete and next field load
         
-            # try:
             case_inputs = row.find_elements(By.CSS_SELECTOR, "input.ddinput.input_col3d")
             if not case_inputs:
                 raise TimeEntryException(f"Case number input not found/loaded for {self.caseNum}")
@@ -107,6 +98,9 @@ class TimeEntry:
                 time_input.send_keys(Keys.TAB) # Tab to next field
 
             # If the task is out of court we have to select a specific task code from a drop down. Hard coded for now, going to create a lookup table that I can append to later.
+            task_type_input = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col11d")
+            if not task_type_input:
+                raise TimeEntryException(f"Task type input not found/loaded for {self.caseNum}\n")
             if self.Task.taskCode == "Out Of Court":
                     task_type_input.send_keys(self.Task.taskType)
                     time.sleep(1)
@@ -139,6 +133,7 @@ class TimeEntry:
             return False
         except Exception as e:
             print(f"Error with site on case {self.caseNum}: {e}")
+            logResult("TimeEntry_Log.txt", f"General Exception: {e} on case {self.caseNum}\n")
             return False
 
 class TimeEntryException(Exception):
