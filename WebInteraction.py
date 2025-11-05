@@ -17,13 +17,17 @@ def login(driver, attorney):
     username_input.send_keys(attorney.username)  # Pass the username
     password_input.send_keys(attorney.password)  # Pass the password
 
-    time.sleep(3)
+    time.sleep(1)
     password_input.send_keys(Keys.RETURN) # Press Enter to submit the form
 
-    # Navigate to the time entry screen after logging in
-    input("Press Enter to continue when logged in...")
-    click_toolbar_button_by_layout_id(driver, '5028') # Click the time entry button
-    time.sleep(10) # Letting time entry page load
+    xpath = f"//div[contains(@class, 'toolbutton') and contains(@controlinit, 'layoutId:5028')]"
+    try:
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, xpath))
+        )
+        return True
+    except:
+        return False
 
 def click_toolbar_button_by_layout_id(driver, layout_id, timeout=10):
     """
@@ -105,5 +109,15 @@ def check_for_error(driver):
             close_button = validation_fail.find_element(By.TAG_NAME, "input")
             close_button.click()
             return True
+    except:
+        return False
+
+def wait_for_element(driver, xpath):
+    #xpath = f"//input[contains(@class, 'ddinput input_col3d')]"
+    try:
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.XPATH, xpath))    
+        )
+        return True
     except:
         return False
