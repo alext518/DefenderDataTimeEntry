@@ -24,6 +24,8 @@
     <Compile Include="Attorney.py" />
     <Compile Include="DefenderDataTimeEntry.py" />
     <Compile Include="FileManagement.py" />
+    <Compile Include="Log.py" />
+    <Compile Include="main.py" />
     <Compile Include="Task.py" />
     <Compile Include="TimeEntry.py" />
     <Compile Include="WebInteraction.py" />

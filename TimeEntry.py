@@ -1,3 +1,4 @@
+from datetime import datetime
 from encodings.punycode import T
 from math import isnan
 from WebInteraction import check_for_error, click_toolbar_button_timesheet_clear
@@ -5,11 +6,12 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from FileManagement import logResult
+from FileManagement import log_result
 import time
+import Attorney
 
 class TimeEntry:
-    def __init__(self, date, Task, duration, caseNum, notes, originalString):
+    def __init__(self, date: str, Task, duration, caseNum: str, notes: str, originalString: str):
         self.date = date
         self.Task = Task
         self.duration = duration
@@ -17,11 +19,20 @@ class TimeEntry:
         self.notes = notes
         self.originalString = originalString
 
-    def saveEntry(self, file_name):
-        print(f"Saving {self.originalString} to {file_name}")
-        open (file_name, "a", encoding="utf-8").write(f"{self.originalString}\n")
+    def saveEntry(self, success: bool, attorney: Attorney) -> None:
+        date_str = datetime.now().date().isoformat()
+        if success:
+            log_result(f"Entry_Success_{date_str}.txt", f"{datetime.now()}: Added time entry for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
+            log_result(f"{date_str}_TimeEntry_Log.txt", f"{datetime.now()}: Added time entry for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
+            print(f"Saving {self.originalString} to {attorney.name}\\Successful_Entries_{date_str}.csv")
+            open (f"{attorney.name}\\Successful_Entries_{date_str}.csv", "a", encoding="utf-8").write(f"{self.originalString}\n")
+        else:
+            log_result(f"Entry_Failure_{date_str}.txt", f"{datetime.now()}: Time entry failed to be added for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
+            log_result(f"{date_str}_TimeEntry_Log.txt", f"{datetime.now()}: Time entry failed to be added for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
+            print(f"Saving {self.originalString} to {attorney.name}\\Failed_Entries_{date_str}.csv")
+            open (f"{attorney.name}\\Failed_Entries_{date_str}.csv", "a", encoding="utf-8").write(f"{self.originalString}\n")
 
-    def add_time_entry(self, driver):
+    def add_time_entry(self, driver) -> bool:
         try:
             # Find the parent record table that holds all rows
             parent_xpath = f"//div[@control='recordtable']" 
@@ -57,7 +68,7 @@ class TimeEntry:
         
             case_inputs = row.find_elements(By.CSS_SELECTOR, "input.ddinput.input_col3d")
             if not case_inputs:
-                raise TimeEntryException(f"Case number input not found/loaded for {self.caseNum}")
+                raise TimeEntryException(f"Case number input field not found/loaded for {self.caseNum}")
             for inp in case_inputs:
                 if inp.is_displayed():
                     case_input = inp
@@ -70,7 +81,7 @@ class TimeEntry:
                 EC.visibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))    
             )
             drop_list_text = driver.find_element(By.CSS_SELECTOR, "div.droplist")
-            if self.caseNum not in drop_list_text.text:
+            if self.caseNum.upper() not in drop_list_text.text.upper():
                 raise TimeEntryException(f"Case number {self.caseNum} not found in DefenderData. Check case number/add case to DefenderData.")
             case_input.send_keys(Keys.TAB) # Tab to next field
             WebDriverWait(driver, 10).until(
@@ -118,7 +129,6 @@ class TimeEntry:
                 else:
                     notes_input.clear()
                     notes_input.send_keys(self.notes)
-                    #notes_input.send_keys(Keys.TAB) # Tab to next field
                     time.sleep(1) # Let the tab complete and next field load
 
             click_toolbar_button_timesheet_clear(driver) # Click save and clear button after timesheet is filled out
@@ -129,11 +139,11 @@ class TimeEntry:
 
         except TimeEntryException as e:
             print(f"TimeEntryException: {e.message}")
-            logResult("TimeEntry_Log.txt", f"TimeEntryException: {e.message}\n")
+            log_result("TimeEntry_Log.txt", f"TimeEntryException: {e.message}\n")
             return False
         except Exception as e:
             print(f"Error with site on case {self.caseNum}: {e}")
-            logResult("TimeEntry_Log.txt", f"General Exception: {e} on case {self.caseNum}\n")
+            log_result("TimeEntry_Log.txt", f"General Exception: {e} on case {self.caseNum}\n")
             return False
 
 class TimeEntryException(Exception):

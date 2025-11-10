@@ -8,22 +8,22 @@ class Task:
         taskCode = self.taskCode
         taskType = self.taskType
         # Code list format will be this: "Task Description string,tcodes index pos,ttypes index pos"
-        current_codes = []
+        mapped_codes = []
         taskCodes = ["In Court", "In Court Waiting", "Out Of Court"]
         taskTypes = ["Case Development", "Discovery Review", "Hearing/Trial Prep", "Interview In Custody", "Interview Out of Custody", "Negotiations", "Other", "Research/Motions","Travel"]
         codes_filename = "task_codes.txt"
         try:
             open(codes_filename, "x", encoding="utf-8") # If file doesn't exist create one
         except FileExistsError: # If it already exits, read the contents
-            with open(codes_filename, "r", encoding="utf-8") as codes_file:
-                current_codes.extend([line.strip() for line in codes_file])
+            with open(codes_filename, "r", encoding="utf-8") as mapped_codes_file:
+                mapped_codes.extend([line.strip() for line in mapped_codes_file])
         # Try to see if we have code mapped already
         code_found = False
-        for code in current_codes:
+        for code in mapped_codes:
             code_found = False
-            curr_code_desc = code.split(',')[0]
-            curr_code_code = code.split(',')[1]
-            curr_code_type = code.split(',')[2]
+            curr_code_desc: str = code.split(',')[0]
+            curr_code_code: int = code.split(',')[1]
+            curr_code_type: int = code.split(',')[2]
             if curr_code_desc.upper() != taskCode.upper():
                 continue
             else:
@@ -33,7 +33,7 @@ class Task:
                 break;
 
         if code_found == False: # Map it and append to code file
-            print(f"\nTask code '{curr_code_desc}' not found in existing codes. Please map it.")
+            print(f"\nTask code '{taskCode}' not found in existing codes. Please map it.")
             print("Available Task Codes:")
             for idx, code in enumerate(taskCodes):
                 print(f"{idx}: {code}")
@@ -48,6 +48,6 @@ class Task:
                 type_index = -1 # Indicate we don't need type for things in court
 
             self.taskCode = taskCodes[int(code_index)]
-            with open(codes_filename, "a", encoding="utf-8") as codes_file:
-                codes_file.write(f"{curr_code_desc},{code_index},{type_index}\n")
-                print(f"Added new task code mapping: {curr_code_desc},{code_index},{type_index}")
+            with open(codes_filename, "a", encoding="utf-8") as mapped_codes_file:
+                mapped_codes_file.write(f"{taskCode},{code_index},{type_index}\n")
+                print(f"Added new task code mapping: {taskCode},{code_index},{type_index}")

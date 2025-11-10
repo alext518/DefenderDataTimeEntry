@@ -1,8 +1,8 @@
 import pandas as pd
-def logResult(log_name, log_entry):
+def log_result(log_name, log_entry):
     open(log_name, "a", encoding="utf-8").write(log_entry)
 
-def getTimeDataPath(attorney):
+def get_time_data_path(attorney):
     return attorney + '/current_time_report_final.csv'
 
 def read_time_data(file_path):
