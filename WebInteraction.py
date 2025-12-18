@@ -112,11 +112,28 @@ def check_for_error(driver):
     except:
         return False
 
-def wait_for_element(driver, xpath):
-    #xpath = f"//input[contains(@class, 'ddinput input_col3d')]"
+def wait_for_element_presence(driver, type: By, identity) -> bool:
     try:
         WebDriverWait(driver, 30).until(
-            EC.presence_of_element_located((By.XPATH, xpath))    
+            EC.presence_of_element_located((type, identity))    
+        )
+        return True
+    except:
+        return False
+
+def wait_for_element_visibility(driver, type: By, identity) -> bool:
+    try:
+        WebDriverWait(driver, 30).until(
+            EC.visibility_of_element_located((type, identity))    
+        )
+        return True
+    except:
+        return False
+
+def wait_for_element_invisibility(driver, type: By, identity) -> bool:
+    try:
+        WebDriverWait(driver, 30).until(
+            EC.invisibility_of_element_located((type, identity))    
         )
         return True
     except:

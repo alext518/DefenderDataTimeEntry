@@ -1,3 +1,4 @@
+from tabnanny import check
 from pandas import pandas as pd
 from selenium import webdriver as wd
 from datetime import datetime
@@ -11,7 +12,7 @@ def setup_webdriver(attorney):
     """Sets up the Selenium WebDriver."""
     options = wd.ChromeOptions()
     options.add_argument("--log-level=3")
-    options.add_experimental_option("detach", True)  # Keeps browser open after script ends
+    options.add_experimental_option("detach", False)  # Keeps browser open after script ends
     driver = wd.Chrome(options=options)
     driver.get('https://east.justiceworks.com/dd7/web/start/31053')  # Replace with actual URL
     
@@ -57,7 +58,7 @@ def remove_failed_entries(time_list: list[te], case_number: str, attorney: Attor
         print(f"Removed all instances of {entry.caseNum} from the time list.")
         return
 
-def create_mycase_entry_files(attorney: Attorney):
+def create_mycase_entry_files(attorney: Attorney) -> None:
     try:
         date_str = datetime.now().date().isoformat()
         open (f"{attorney.name}\\Successful_Entries_{date_str}.csv", "x", encoding="utf-8").write(f"Date,Activity,Duration/Quantity,Case Number,Description\n")
@@ -69,6 +70,7 @@ def create_mycase_entry_files(attorney: Attorney):
         print(f"Failed_Entries file created!")
     except FileExistsError as e:
         print(f"{e}")
+
 # Begin main script exectution
 name = input("Enter attorney name (Shelby or Dane): ").strip()
 if name not in ["Shelby", "Dane", "John"]:
@@ -87,17 +89,27 @@ time_list: list[te] = populate_time_list(time_data) # List to hold TimeEntry obj
 print("All codes mapped!")
 xpath = f"//input[contains(@class, 'ddinput input_col3d')]"
 while True:
-    if(wait_for_element(driver, xpath)): # Wait for timesheet to load to avoid user interaction
+    if(wait_for_element_presence(driver, By.XPATH, xpath)): # Wait for timesheet to load to avoid user interaction
         print("Timesheet loaded successfully!")
         break
     else:
         print("Waiting for timesheet to load...")
         
 date_str = datetime.now().date().isoformat()
-for entry in time_list:
-    if entry.add_time_entry(driver) and not check_for_error(driver):
-        entry.saveEntry(True, attorney) # Save successful entry to file for processing later
-    else:
-        # TODO: Add function to loop through data list and remove matching case number entries and add them to the failure list all at once
-        remove_failed_entries(time_list, entry.caseNum, attorney)
-        click_toolbar_button_delete(driver) # Delete the failed entry row
+
+# We should eventually run out of items in time_list now, and we'll keep checking until that happens
+while any(time_list):
+    for entry in time_list:
+        if entry.add_time_entry(driver) and not check_for_error(driver):
+            entry.saveEntry(True, attorney) # Save successful entry to file for logging
+            time_list.pop(0) # remove successful element so we don't add twice
+        else:
+            # DONE: Add function to loop through data list and remove matching case number entries and add them to the failure list all at once
+            remove_failed_entries(time_list, entry.caseNum, attorney)
+            click_toolbar_button_delete(driver) # Delete the failed entry row
+            break # restart loop through time_list with all missing case time entries removed
+
+log_result(f"{date_str}_TimeEntry_Log.txt", "All cases processed successfully! Please review success and failure time entries.")
+print("All cases processed successfully! Please review success and failure time entries.")
+driver.close()
+check_for_error(driver)

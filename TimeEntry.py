@@ -2,7 +2,7 @@ from ast import List
 from datetime import datetime
 from encodings.punycode import T
 from math import isnan
-from WebInteraction import check_for_error, click_toolbar_button_timesheet_clear
+from WebInteraction import *
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -93,15 +93,14 @@ class TimeEntry:
             case_input.clear()
             # Handle case numbers with semi-colons in them. This indicates that there may be multiple cases for the same client and were entered under one case in MyCase.
             case_found: bool = False
+            droplist_css: str = "div.droplist"
             while case_found == False:
                 multi_case_list:List = self.caseNum.split(';')
                 for num in multi_case_list:
                     self.caseNum = sanitize_case(num.strip())
                     case_input.send_keys(self.caseNum)
-                    WebDriverWait(driver, 10).until(
-                        EC.visibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))    
-                    )
-                    drop_list_text = driver.find_element(By.CSS_SELECTOR, "div.droplist")
+                    wait_for_element_visibility(driver, By.CSS_SELECTOR, droplist_css)
+                    drop_list_text = driver.find_element(By.CSS_SELECTOR, droplist_css)
                     if self.caseNum.upper() not in drop_list_text.text.upper():
                         case_input.clear()
                         continue
@@ -112,9 +111,8 @@ class TimeEntry:
                     raise TimeEntryException(f"Case number {self.caseNum} not found in DefenderData. Check case number/add case to DefenderData.")
 
             case_input.send_keys(Keys.TAB) # Tab to next field
-            WebDriverWait(driver, 10).until(
-                EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))
-            )
+            
+            wait_for_element_visibility(driver, By.CSS_SELECTOR, "div.droplist")
             
             task_code_input = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col4d")
             if not task_code_input:
@@ -124,9 +122,7 @@ class TimeEntry:
                 task_code_input.send_keys(self.Task.taskCode)
                 time.sleep(1)
                 task_code_input.send_keys(Keys.TAB) # Tab to next field
-                WebDriverWait(driver, 10).until(
-                    EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))    
-                )
+                wait_for_element_invisibility(driver, By.CSS_SELECTOR, droplist_css)
             time_input = row.find_element(By.CSS_SELECTOR, "input.inputfield.input_col5d")
             if not time_input:
                 raise TimeEntryException(f"Time input not found/loaded for {self.caseNum}")
@@ -144,9 +140,7 @@ class TimeEntry:
                     task_type_input.send_keys(self.Task.taskType)
                     time.sleep(1)
                     time_input.send_keys(Keys.TAB) # Tab to next field
-                    WebDriverWait(driver, 10).until(
-                        EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))    
-                    )
+                    wait_for_element_invisibility(driver, By.CSS_SELECTOR, "div.droplist")
 
             if self.notes == "":
                 pass # No notes to add
