@@ -1,3 +1,4 @@
+from ast import List
 from datetime import datetime
 from encodings.punycode import T
 from math import isnan
@@ -9,6 +10,20 @@ from selenium.webdriver.common.keys import Keys
 from FileManagement import log_result
 import time
 import Attorney
+
+def sanitize_case(case_num: str) -> str:
+    has_c = 'C' in case_num.upper()
+    has_r = 'R' in case_num.upper()
+    # Convert to list to make adding characters simpler
+    case_num_list: list[str] = list(case_num)
+    if not has_c: case_num_list.insert(2, 'C')
+    if not has_r: case_num_list.insert(3, 'R')
+    if len(case_num_list) < 14:
+        while len(case_num_list) < 14:
+            case_num_list.insert(4, '0')
+    # Convert list back to string to get the sanitized case number
+    final_string: str = "".join(case_num_list)
+    return final_string
 
 class TimeEntry:
     def __init__(self, date: str, Task, duration, caseNum: str, notes: str, originalString: str):
@@ -76,13 +91,26 @@ class TimeEntry:
                 else:
                     case_input = None
             case_input.clear()
-            case_input.send_keys(self.caseNum)
-            WebDriverWait(driver, 10).until(
-                EC.visibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))    
-            )
-            drop_list_text = driver.find_element(By.CSS_SELECTOR, "div.droplist")
-            if self.caseNum.upper() not in drop_list_text.text.upper():
-                raise TimeEntryException(f"Case number {self.caseNum} not found in DefenderData. Check case number/add case to DefenderData.")
+            # Handle case numbers with semi-colons in them. This indicates that there may be multiple cases for the same client and were entered under one case in MyCase.
+            case_found: bool = False
+            while case_found == False:
+                multi_case_list:List = self.caseNum.split(';')
+                for num in multi_case_list:
+                    self.caseNum = sanitize_case(num.strip())
+                    case_input.send_keys(self.caseNum)
+                    WebDriverWait(driver, 10).until(
+                        EC.visibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))    
+                    )
+                    drop_list_text = driver.find_element(By.CSS_SELECTOR, "div.droplist")
+                    if self.caseNum.upper() not in drop_list_text.text.upper():
+                        case_input.clear()
+                        continue
+                    else:
+                        case_found = True
+                        break
+                if case_found == False:
+                    raise TimeEntryException(f"Case number {self.caseNum} not found in DefenderData. Check case number/add case to DefenderData.")
+
             case_input.send_keys(Keys.TAB) # Tab to next field
             WebDriverWait(driver, 10).until(
                 EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.droplist"))
@@ -145,6 +173,10 @@ class TimeEntry:
             print(f"Error with site on case {self.caseNum}: {e}")
             log_result("TimeEntry_Log.txt", f"General Exception: {e} on case {self.caseNum}\n")
             return False
+
+    def case_found(self, drop_list_text):
+        return self.caseNum.upper() in drop_list_text.text.upper()
+        
 
 class TimeEntryException(Exception):
     """Custom exception for TimeEntry errors."""

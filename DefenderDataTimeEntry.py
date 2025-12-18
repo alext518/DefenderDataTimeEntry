@@ -46,25 +46,39 @@ def populate_time_list(time_data: pd.DataFrame) -> list[te]:
 def remove_failed_entries(time_list: list[te], case_number: str, attorney: Attorney) -> list[te]:
     """Remove all entries of a failed time entry"""
     try:
-        for entry in time_list:
-            if entry.caseNum == case_number:
-                entry.saveEntry(False, attorney)
-                time_list.remove(entry.caseNum)
+        while any(item.caseNum == case_number for item in time_list):
+            for index, item in enumerate(time_list):
+                if case_number in item.caseNum:
+                    item.saveEntry(False, attorney)
+                    del time_list[index]
+                    break # break loop to begin search again
     except ValueError as ve:
         # TODO: Log the message as "all cases removed" since this error indicates the list is now empty of that case number
         print(f"Removed all instances of {entry.caseNum} from the time list.")
         return
 
+def create_mycase_entry_files(attorney: Attorney):
+    try:
+        date_str = datetime.now().date().isoformat()
+        open (f"{attorney.name}\\Successful_Entries_{date_str}.csv", "x", encoding="utf-8").write(f"Date,Activity,Duration/Quantity,Case Number,Description\n")
+        print(f"Successful_Entries file created!")
+    except FileExistsError as e:
+        print(f"{e}")
+    try:
+        open (f"{attorney.name}\\Failed_Entries_{date_str}.csv", "x", encoding="utf-8").write(f"Date,Activity,Duration/Quantity,Case Number,Description\n")
+        print(f"Failed_Entries file created!")
+    except FileExistsError as e:
+        print(f"{e}")
 # Begin main script exectution
 name = input("Enter attorney name (Shelby or Dane): ").strip()
-if name not in ["Shelby", "Dane"]:
-    print("Invalid attorney name. Please enter 'Shelby' or 'Dane'.")
+if name not in ["Shelby", "Dane", "John"]:
+    print("Invalid attorney name. Please enter 'Shelby', 'Dane', or 'John'.")
     exit(1)
 else:
     attorney = Attorney(name)
 
 driver = setup_webdriver(attorney) # Start webdriver
-
+create_mycase_entry_files(attorney) # Create files if needed
 print("Reading time sheet data from file...")
 time_data = read_time_data(get_time_data_path(attorney.name))
 
