@@ -3,9 +3,9 @@
   <p>Many attorneys are already entering billable time in their firm's CRM software, <i>e.g. MyCase and Cleo</i>, so in an effort to reduce the double entry this script can be used in conjunction with built in reporting features in the CRM software.</p>
 
 <h3>The time entry data file:</h3>
-<p>This file is going to be read in by the script for the purposes of processing data.</p>
-<p>Currently, the script is set up for the MyCase report "User time & expenses" to be exported as a CSV.</p>
-<p>The file must be reduced to only include the relevant columns in order: 
+<p>This file is to be read in by the script for the purposes of processing data.</p>
+<p>Currently, the script is set up for the MyCase report "User time & expenses" to be exported as a CSV (Clio support coming soon).</p>
+<p>The file is parsed to only include the relevant columns in order: 
   <ul>
     <li>Date</li>
     <li>Activity</li>
