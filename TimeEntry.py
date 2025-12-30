@@ -26,28 +26,29 @@ def sanitize_case(case_num: str) -> str:
     return final_string
 
 class TimeEntry:
-    def __init__(self, date: str, Task, duration, caseNum: str, notes: str, originalString: str):
+    def __init__(self, date: str, Task, duration, caseNum: str, notes: str, originalString: str, logger = None):
         self.date = date
         self.Task = Task
         self.duration = duration
         self.caseNum = caseNum
         self.notes = notes
         self.originalString = originalString
+        self.logger = logger
 
-    def saveEntry(self, success: bool, attorney: Attorney) -> None:
+    def saveEntry(self, success: bool, attorney: Attorney, logger = None) -> None:
         date_str = datetime.now().date().isoformat()
         if success:
-            log_result(f"Entry_Success_{date_str}.txt", f"{datetime.now()}: Added time entry for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
-            log_result(f"{date_str}_TimeEntry_Log.txt", f"{datetime.now()}: Added time entry for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
-            print(f"Saving {self.originalString} to {attorney.name}\\Successful_Entries_{date_str}.csv")
+            # log_result(f"Entry_Success_{date_str}.txt", f"{datetime.now()}: Added time entry for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
+            # log_result(f"{date_str}_TimeEntry_Log.txt", f"{datetime.now()}: Added time entry for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
+            logger.info(f"Saving {self.originalString} to {attorney.name}\\Successful_Entries_{date_str}.csv")
             open (f"{attorney.name}\\Successful_Entries_{date_str}.csv", "a", encoding="utf-8").write(f"{self.originalString}\n")
         else:
-            log_result(f"Entry_Failure_{date_str}.txt", f"{datetime.now()}: Time entry failed to be added for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
-            log_result(f"{date_str}_TimeEntry_Log.txt", f"{datetime.now()}: Time entry failed to be added for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
-            print(f"Saving {self.originalString} to {attorney.name}\\Failed_Entries_{date_str}.csv")
+            # log_result(f"Entry_Failure_{date_str}.txt", f"{datetime.now()}: Time entry failed to be added for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
+            # log_result(f"{date_str}_TimeEntry_Log.txt", f"{datetime.now()}: Time entry failed to be added for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
+            logger.info(f"Saving {self.originalString} to {attorney.name}\\Failed_Entries_{date_str}.csv")
             open (f"{attorney.name}\\Failed_Entries_{date_str}.csv", "a", encoding="utf-8").write(f"{self.originalString}\n")
 
-    def add_time_entry(self, driver) -> bool:
+    def add_time_entry(self, driver, logger = None) -> bool:
         try:
             # Find the parent record table that holds all rows
             parent_xpath = f"//div[@control='recordtable']" 
@@ -65,7 +66,7 @@ class TimeEntry:
                         break
                 except Exception as e:
                     # Catch stale element and retry
-                    print(f"Retrying recordtable fetch due to: {e}")
+                    self.logger.warning(f"Retrying recordtable fetch due to: {e}")
                 time.sleep(1)
 
             time.sleep(1)
@@ -160,12 +161,10 @@ class TimeEntry:
                 return True
 
         except TimeEntryException as e:
-            print(f"TimeEntryException: {e.message}")
-            log_result("TimeEntry_Log.txt", f"TimeEntryException: {e.message}\n")
+            logger.error(f"TimeEntryException: {e.message}")
             return False
         except Exception as e:
-            print(f"Error with site on case {self.caseNum}: {e}")
-            log_result("TimeEntry_Log.txt", f"General Exception: {e} on case {self.caseNum}\n")
+            logger.error(f"Error with site on case {self.caseNum}: {e}")
             return False
 
     def case_found(self, drop_list_text):

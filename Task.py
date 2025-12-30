@@ -1,8 +1,9 @@
 class Task:
-    def __init__(self, taskCode):
+    def __init__(self, taskCode, logger = None):
         self.taskCode = taskCode
         self.taskType = ""
         self.convert_task_code_entries()
+        self.logger = logger
 
     def convert_task_code_entries(self):
         taskCode = self.taskCode
@@ -33,15 +34,15 @@ class Task:
                 break;
 
         if code_found == False: # Map it and append to code file
-            print(f"\nTask code '{taskCode}' not found in existing codes. Please map it.")
-            print("Available Task Codes:")
+            self.logger.warning(f"\nTask code '{taskCode}' not found in existing codes. Please map it.")
+            self.logger.info("Available Task Codes:")
             for idx, code in enumerate(taskCodes):
-                print(f"{idx}: {code}")
+                self.logger.info(f"{idx}: {code}")
             code_index = input("Enter the index number for the appropriate Task Code: ")
             if code_index == '2': # If out of court, we need to map a task type as well
-                print("Available Task Types:")
+                self.logger.info("Available Task Types:")
                 for idx, taskType in enumerate(taskTypes):
-                    print(f"{idx}: {taskType}")
+                    self.logger.info(f"{idx}: {taskType}")
                 type_index = input("Enter the index number for the appropriate Task Type: ")
                 self.taskType = taskTypes[int(type_index)]
             else:
@@ -50,4 +51,4 @@ class Task:
             self.taskCode = taskCodes[int(code_index)]
             with open(codes_filename, "a", encoding="utf-8") as mapped_codes_file:
                 mapped_codes_file.write(f"{taskCode},{code_index},{type_index}\n")
-                print(f"Added new task code mapping: {taskCode},{code_index},{type_index}")
+                self.logger.info(f"Added new task code mapping: {taskCode},{code_index},{type_index}")

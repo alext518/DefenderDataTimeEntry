@@ -29,7 +29,7 @@ def login(driver, attorney):
     except:
         return False
 
-def click_toolbar_button_by_layout_id(driver, layout_id, timeout=10):
+def click_toolbar_button_by_layout_id(driver, layout_id, logger = None, timeout=10):
     """
     Clicks a toolbar button based on its layoutId in the controlinit attribute.
 
@@ -45,11 +45,11 @@ def click_toolbar_button_by_layout_id(driver, layout_id, timeout=10):
         )
         driver.execute_script("arguments[0].scrollIntoView(true);", button)
         driver.execute_script("arguments[0].click();", button)
-        print(f"Clicked toolbar button with layoutId: {layout_id}")
+        logger.info(f"Clicked toolbar button with layoutId: {layout_id}")
     except Exception as e:
-        print(f"Failed to click toolbar button with layoutId {layout_id}: {e}")
+        logger.error(f"Failed to click toolbar button with layoutId {layout_id}: {e}")
 
-def click_toolbar_button_timesheet_clear(driver, timeout=10):
+def click_toolbar_button_timesheet_clear(driver, logger = None, timeout=10):
     """
     Clicks a toolbar button based on its layoutId in the controlinit attribute.
 
@@ -65,11 +65,11 @@ def click_toolbar_button_timesheet_clear(driver, timeout=10):
         )
         driver.execute_script("arguments[0].scrollIntoView(true);", button)
         driver.execute_script("arguments[0].click();", button)
-        print(f"Clicked toolbar button Save/Clear")
+        logger.info(f"Clicked toolbar button Save/Clear")
     except Exception as e:
-        print(f"Failed to click toolbar button with layoutId 5028: {e}")
+        logger.error(f"Failed to click toolbar button with layoutId 5028: {e}")
 
-def click_toolbar_button_delete(driver, timeout=10):
+def click_toolbar_button_delete(driver, logger = None, timeout=10):
     xpath = f"//div[contains(@class, 'toolbutton') and contains(@controlinit, 'action:delete,refresheditbtns')]"
     try:
         button = WebDriverWait(driver, timeout).until(
@@ -77,29 +77,29 @@ def click_toolbar_button_delete(driver, timeout=10):
         )
         driver.execute_script("arguments[0].scrollIntoView(true);", button)
         driver.execute_script("arguments[0].click();", button)
-        print(f"Clicked toolbar button Delete")
+        logger.info(f"Clicked toolbar button Delete")
         # After clicking the delete button, wait for the alert and accept it
         try:
             WebDriverWait(driver, 10).until(EC.alert_is_present())
             alert = driver.switch_to.alert
             alert.accept()  # This presses "OK" or "Enter" on the prompt
-            print("Alert accepted.")
+            logger.info("Alert accepted.")
         except Exception as e:
-            print(f"No alert appeared or failed to accept: {e}")
+            logger.warning(f"No alert appeared or failed to accept: {e}")
         click_toolbar_button_timesheet_clear(driver)
     except Exception as e:
-        print(f"Failed to click toolbar button delete: {e}")
+        logger.error(f"Failed to click toolbar button delete: {e}")
 
-def add_new_time_row(driver):
+def add_new_time_row(driver, logger = None):
     xpath = f"//div[@class = 'toolbutton new_without_data']"
     try:
         button = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located((By.XPATH, xpath))
         )
         driver.execute_script("arguments[0].click()", button)
-        print("Clicked new row button")
+        logger.info("Clicked new row button")
     except Exception as e:
-        print(f"Error adding new row. {e}")
+        logger.error(f"Error adding new row. {e}")
 
 def check_for_error(driver):
     try:

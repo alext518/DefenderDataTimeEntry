@@ -22,6 +22,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Attorney.py" />
+    <Compile Include="base_api_helper.py" />
     <Compile Include="ClioActivities.py" />
     <Compile Include="ClioAPIAccess.py" />
     <Compile Include="ClioMatters.py" />
