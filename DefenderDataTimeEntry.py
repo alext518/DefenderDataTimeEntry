@@ -77,7 +77,7 @@ def create_mycase_entry_files(attorney: Attorney) -> None:
         print(f"{e}")
 
 # Begin main script exectution
-# name = input("Enter attorney name (Shelby or Dane): ").strip()
+# name = input("Enter attorney name (Shelby, Dane, or John): ").strip()
 name = 'John' # hard-coding for easier debugging
 if name not in ["Shelby", "Dane", "John"]:
     print("Invalid attorney name. Please enter 'Shelby', 'Dane', or 'John'.")

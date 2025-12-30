@@ -31,6 +31,8 @@
     <Compile Include="FileManagement.py" />
     <Compile Include="Log.py" />
     <Compile Include="main.py" />
+    <Compile Include="MyCaseAPIAccess.py" />
+    <Compile Include="MyCaseTimeEntry.py" />
     <Compile Include="Task.py" />
     <Compile Include="TimeEntry.py" />
     <Compile Include="WebInteraction.py" />
