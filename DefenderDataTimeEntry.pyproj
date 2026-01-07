@@ -36,6 +36,7 @@
     <Compile Include="MyCaseTimeEntry.py" />
     <Compile Include="Task.py" />
     <Compile Include="TimeEntry.py" />
+    <Compile Include="twisted_web_server_test.py" />
     <Compile Include="WebInteraction.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
