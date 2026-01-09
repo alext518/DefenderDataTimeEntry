@@ -63,7 +63,7 @@ class system_mycase(system_base):
             while any(item.caseNum == case_number for item in time_list):
                 for index, item in enumerate(time_list):
                     if case_number in item.caseNum:
-                        item.saveEntry(False, attorney, logger)
+                        item.saveEntry(False, attorney_name, logger)
                         del time_list[index]
                         break # break loop to begin search again
         except ValueError as ve:
@@ -75,7 +75,6 @@ class system_mycase(system_base):
         driver = wi.setup_webdriver(username, password) # Start webdriver
         self.create_mycase_entry_files(attorney_name) # Create files if needed
         logger.info("Reading time sheet data from file...")
-        #time_data = read_time_data(get_time_data_path(attorney.name), logger = logger)
 
         time_list: list[te] = self.populate_time_list(data) # List to hold TimeEntry objects
 

@@ -37,6 +37,7 @@ def setup_webdriver(username, password):
     """Sets up the Selenium WebDriver."""
     options = wd.ChromeOptions()
     options.add_argument("--log-level=3")
+    options.add_argument("--window-size=1500,500")
     options.add_experimental_option("detach", False)  # Keeps browser open after script ends
     driver = wd.Chrome(options=options)
     driver.get('https://east.justiceworks.com/dd7/web/start/31053')  # Replace with actual URL

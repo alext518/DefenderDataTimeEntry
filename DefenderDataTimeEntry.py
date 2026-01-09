@@ -16,11 +16,13 @@ import system_clio as sc
 
 import logging
 
+date_str = datetime.now().date().isoformat()
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s %(levelname)s %(name)s: %(message)s',
     handlers=[
-        logging.FileHandler("DefenderDataTimeEntry.log"),
+        logging.FileHandler(f"{date_str}_DefenderDataTimeEntry.log"),
         logging.StreamHandler()
     ]
 )

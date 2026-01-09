@@ -67,7 +67,7 @@ class TimeEntry:
                     logger.warning(f"Retrying recordtable fetch due to: {e}")
                 time.sleep(1)
 
-            time.sleep(1)
+            time.sleep(.5)
             # Find the specific child row we're adding
             row_xpath = f"//div[@cid='{rowcount}']" # Figure out which row we're editing using the last count in the row
             row = recordtable.find_element(By.XPATH, row_xpath)
@@ -98,6 +98,7 @@ class TimeEntry:
                 for num in multi_case_list:
                     self.caseNum = sanitize_case(num.strip())
                     case_input.send_keys(self.caseNum)
+                    # time.sleep(1)
                     wait_for_element_visibility(driver, By.CSS_SELECTOR, droplist_css)
                     drop_list_text = driver.find_element(By.CSS_SELECTOR, droplist_css)
                     if self.caseNum.upper() not in drop_list_text.text.upper():
@@ -108,8 +109,9 @@ class TimeEntry:
                         break
                 if case_found == False:
                     raise TimeEntryException(f"Case number {self.caseNum} not found in DefenderData. Check case number/add case to DefenderData.")
-
+            
             case_input.send_keys(Keys.TAB) # Tab to next field
+            wait_for_element_invisibility(driver, By.CSS_SELECTOR, droplist_css)            
             
             task_code_input = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col4d")
             if not task_code_input:
@@ -117,9 +119,10 @@ class TimeEntry:
             else:
                 task_code_input.clear()
                 task_code_input.send_keys(self.Task.taskCode)
-                time.sleep(1)
+                # time.sleep(1)
+                wait_for_element_visibility(driver, By.CSS_SELECTOR, droplist_css)
                 task_code_input.send_keys(Keys.TAB) # Tab to next field
-                time.sleep(1)
+                #time.sleep(1)
                 wait_for_element_invisibility(driver, By.CSS_SELECTOR, droplist_css)
             time_input = row.find_element(By.CSS_SELECTOR, "input.inputfield.input_col5d")
             if not time_input:
@@ -127,18 +130,19 @@ class TimeEntry:
             else:
                 time_input.clear()
                 time_input.send_keys(self.duration)
-                time.sleep(1)
+                # time.sleep(1)
                 time_input.send_keys(Keys.TAB) # Tab to next field
-                time.sleep(1) # Let the tab complete and next field load
+                # time.sleep(1) # Let the tab complete and next field load
 
             # If the task is out of court we have to select a specific task code from a drop down. Hard coded for now, going to create a lookup table that I can append to later.
             task_type_input = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col11d")
             if not task_type_input:
                 raise TimeEntryException(f"Task type input not found/loaded for {self.caseNum}\n")
             if self.Task.taskCode == "Out Of Court":
-                    time.sleep(1)
+                    # time.sleep(1)
                     task_type_input.send_keys(self.Task.taskType)
-                    time.sleep(1)
+                    wait_for_element_visibility(driver, By.CSS_SELECTOR, droplist_css)
+                    # time.sleep(1)
                     time_input.send_keys(Keys.TAB) # Tab to next field
                     wait_for_element_invisibility(driver, By.CSS_SELECTOR, "div.droplist")
 
@@ -151,7 +155,7 @@ class TimeEntry:
                 else:
                     notes_input.clear()
                     notes_input.send_keys(self.notes)
-                    time.sleep(1) # Let the tab complete and next field load
+                    time.sleep(.25) # Let the data entry complete before saving
 
             click_toolbar_button_timesheet_clear(driver) # Click save and clear button after timesheet is filled out
             if check_for_error(driver): # Check for any errors
