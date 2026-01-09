@@ -10,6 +10,9 @@ from selenium.webdriver.common.keys import Keys
 from FileManagement import log_result
 import time
 import Attorney
+import logging 
+
+logger = logging.getLogger(__name__)
 
 def sanitize_case(case_num: str) -> str:
     has_c = 'C' in case_num.upper()
@@ -26,29 +29,24 @@ def sanitize_case(case_num: str) -> str:
     return final_string
 
 class TimeEntry:
-    def __init__(self, date: str, Task, duration, caseNum: str, notes: str, originalString: str, logger = None):
+    def __init__(self, date: str, Task, duration, caseNum: str, notes: str, originalString: str):
         self.date = date
         self.Task = Task
         self.duration = duration
         self.caseNum = caseNum
         self.notes = notes
         self.originalString = originalString
-        self.logger = logger
 
-    def saveEntry(self, success: bool, attorney: Attorney, logger = None) -> None:
+    def saveEntry(self, success: bool, attorney_name: str) -> None:
         date_str = datetime.now().date().isoformat()
         if success:
-            # log_result(f"Entry_Success_{date_str}.txt", f"{datetime.now()}: Added time entry for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
-            # log_result(f"{date_str}_TimeEntry_Log.txt", f"{datetime.now()}: Added time entry for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
-            logger.info(f"Saving {self.originalString} to {attorney.name}\\Successful_Entries_{date_str}.csv")
-            open (f"{attorney.name}\\Successful_Entries_{date_str}.csv", "a", encoding="utf-8").write(f"{self.originalString}\n")
+            logger.info(f"Saving {self.originalString} to {attorney_name}\\Successful_Entries_{date_str}.csv")
+            open (f"{attorney_name}\\Successful_Entries_{date_str}.csv", "a", encoding="utf-8").write(f"{self.originalString}\n")
         else:
-            # log_result(f"Entry_Failure_{date_str}.txt", f"{datetime.now()}: Time entry failed to be added for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
-            # log_result(f"{date_str}_TimeEntry_Log.txt", f"{datetime.now()}: Time entry failed to be added for {self.date}, {self.Task.taskCode}, {self.duration}, {self.caseNum}\n")
-            logger.info(f"Saving {self.originalString} to {attorney.name}\\Failed_Entries_{date_str}.csv")
-            open (f"{attorney.name}\\Failed_Entries_{date_str}.csv", "a", encoding="utf-8").write(f"{self.originalString}\n")
+            logger.info(f"Saving {self.originalString} to {attorney_name}\\Failed_Entries_{date_str}.csv")
+            open (f"{attorney_name}\\Failed_Entries_{date_str}.csv", "a", encoding="utf-8").write(f"{self.originalString}\n")
 
-    def add_time_entry(self, driver, logger = None) -> bool:
+    def add_time_entry(self, driver) -> bool:
         try:
             # Find the parent record table that holds all rows
             parent_xpath = f"//div[@control='recordtable']" 
@@ -59,14 +57,14 @@ class TimeEntry:
             rowcount = None
             while True:
                 try:
-                    time.sleep(2)
+                    time.sleep(1)
                     recordtable = driver.find_element(By.XPATH, parent_xpath)
                     rowcount = recordtable.get_attribute("rowcount")
                     if rowcount == '1':
                         break
                 except Exception as e:
                     # Catch stale element and retry
-                    self.logger.warning(f"Retrying recordtable fetch due to: {e}")
+                    logger.warning(f"Retrying recordtable fetch due to: {e}")
                 time.sleep(1)
 
             time.sleep(1)
@@ -113,8 +111,6 @@ class TimeEntry:
 
             case_input.send_keys(Keys.TAB) # Tab to next field
             
-            wait_for_element_visibility(driver, By.CSS_SELECTOR, "div.droplist")
-            
             task_code_input = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col4d")
             if not task_code_input:
                 raise TimeEntryException(f"Task code input not found/loaded for {self.caseNum}")
@@ -123,6 +119,7 @@ class TimeEntry:
                 task_code_input.send_keys(self.Task.taskCode)
                 time.sleep(1)
                 task_code_input.send_keys(Keys.TAB) # Tab to next field
+                time.sleep(1)
                 wait_for_element_invisibility(driver, By.CSS_SELECTOR, droplist_css)
             time_input = row.find_element(By.CSS_SELECTOR, "input.inputfield.input_col5d")
             if not time_input:
@@ -130,14 +127,16 @@ class TimeEntry:
             else:
                 time_input.clear()
                 time_input.send_keys(self.duration)
-                time.sleep(1) # Let the tab complete and next field load
+                time.sleep(1)
                 time_input.send_keys(Keys.TAB) # Tab to next field
+                time.sleep(1) # Let the tab complete and next field load
 
             # If the task is out of court we have to select a specific task code from a drop down. Hard coded for now, going to create a lookup table that I can append to later.
             task_type_input = row.find_element(By.CSS_SELECTOR, "input.ddinput.input_col11d")
             if not task_type_input:
                 raise TimeEntryException(f"Task type input not found/loaded for {self.caseNum}\n")
             if self.Task.taskCode == "Out Of Court":
+                    time.sleep(1)
                     task_type_input.send_keys(self.Task.taskType)
                     time.sleep(1)
                     time_input.send_keys(Keys.TAB) # Tab to next field
@@ -158,7 +157,31 @@ class TimeEntry:
             if check_for_error(driver): # Check for any errors
                 return False
             else:
-                return True
+                # Check that the record was saved properly by seeing if the case number field is empty now
+                attempts: int = 0
+                while True and attempts < 5:
+                    while True:
+                        try:
+                            time.sleep(1)
+                            save_recordtable = driver.find_element(By.XPATH, parent_xpath)
+                            save_rowcount = save_recordtable.get_attribute("rowcount")
+                            save_row_xpath = f"//div[@cid='{save_rowcount}']" # Figure out which row we're editing using the last count in the row
+                            if save_rowcount == '1':
+                                break
+                        except Exception:
+                            logger.warning("Stale element: retrying save record verification")
+                            time.sleep(1)
+                    save_row = save_recordtable.find_element(By.XPATH, row_xpath)
+                    save_check = save_row.find_elements(By.CSS_SELECTOR, "input.ddinput.input_col3d")
+                    for num in save_check:
+                        if not num.text:
+                            return True
+                        else:
+                            attempts += 1
+                            logger.warn("Case save timeout, waiting before trying again")
+                            time.sleep(3)
+                            click_toolbar_button_timesheet_clear(driver, logger) # Try to save record again
+            return False
 
         except TimeEntryException as e:
             logger.error(f"TimeEntryException: {e.message}")

@@ -13,33 +13,39 @@ class ClioActivities(ClioAPIHelper):
         self.month_number = int(start_date[5:7])
         self.month_name = ""
         self.logger = logger
-        match self.month_number:
-            case 1:
-                self.month_name = "January"
-            case 2:
-                self.month_name = "February"
-            case 3:
-                self.month_name = "March"
-            case 4:
-                self.month_name = "April"
-            case 5:
-                self.month_name = "May"
-            case 6:
-                self.month_name = "June"
-            case 7:
-                self.month_name = "July"
-            case 8:
-                self.month_name = "August"
-            case 9:
-                self.month_name = "September"
-            case 10:
-                self.month_name = "October"
-            case 11:
-                self.month_name = "November"
-            case 12:
-                self.month_name = "December"
-            case _:
-                self.month_name = "Invalid date"
+        self.month_array = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+        if self.month_number > 12 or self.month_number < 1: 
+            self.month_name = "Invalid date" 
+        else:
+           self.month_name = self.month_array[self.month_number - 1]
+        
+        # match self.month_number:
+        #     case 1:
+        #         self.month_name = "January"
+        #     case 2:
+        #         self.month_name = "February"
+        #     case 3:
+        #         self.month_name = "March"
+        #     case 4:
+        #         self.month_name = "April"
+        #     case 5:
+        #         self.month_name = "May"
+        #     case 6:
+        #         self.month_name = "June"
+        #     case 7:
+        #         self.month_name = "July"
+        #     case 8:
+        #         self.month_name = "August"
+        #     case 9:
+        #         self.month_name = "September"
+        #     case 10:
+        #         self.month_name = "October"
+        #     case 11:
+        #         self.month_name = "November"
+        #     case 12:
+        #         self.month_name = "December"
+        #     case _:
+        #         self.month_name = "Invalid date"
         
         # --- Build the API Url for activities ---
         # Fields needed for DD Time entries:

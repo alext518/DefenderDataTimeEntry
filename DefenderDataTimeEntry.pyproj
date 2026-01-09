@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="Attorney.py" />
     <Compile Include="base_api_helper.py" />
+    <Compile Include="system_base_interface.py" />
     <Compile Include="ClioActivities.py" />
     <Compile Include="ClioAPIAccess.py" />
     <Compile Include="ClioMatters.py" />
@@ -34,6 +35,8 @@
     <Compile Include="main.py" />
     <Compile Include="MyCaseAPIAccess.py" />
     <Compile Include="MyCaseTimeEntry.py" />
+    <Compile Include="system_clio.py" />
+    <Compile Include="system_mycase.py" />
     <Compile Include="Task.py" />
     <Compile Include="TimeEntry.py" />
     <Compile Include="twisted_web_server_test.py" />

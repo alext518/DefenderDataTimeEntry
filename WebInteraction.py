@@ -1,10 +1,14 @@
+from selenium import webdriver as wd
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import time
+import logging 
 
-def login(driver, attorney):
+logger = logging.getLogger(__name__)
+
+def login(driver, username, password):
     WebDriverWait(driver, 30).until(
         EC.presence_of_element_located((By.ID, 'userid'))
     )
@@ -14,8 +18,8 @@ def login(driver, attorney):
     username_input.clear()
     password_input.clear()
 
-    username_input.send_keys(attorney.username)  # Pass the username
-    password_input.send_keys(attorney.password)  # Pass the password
+    username_input.send_keys(username)  # Pass the username
+    password_input.send_keys(password)  # Pass the password
 
     time.sleep(1)
     password_input.send_keys(Keys.RETURN) # Press Enter to submit the form
@@ -29,7 +33,26 @@ def login(driver, attorney):
     except:
         return False
 
-def click_toolbar_button_by_layout_id(driver, layout_id, logger = None, timeout=10):
+def setup_webdriver(username, password):
+    """Sets up the Selenium WebDriver."""
+    options = wd.ChromeOptions()
+    options.add_argument("--log-level=3")
+    options.add_experimental_option("detach", False)  # Keeps browser open after script ends
+    driver = wd.Chrome(options=options)
+    driver.get('https://east.justiceworks.com/dd7/web/start/31053')  # Replace with actual URL
+    
+    while True:
+       if(login(driver, username, password)): # Call the login function after opening page
+           logger.info("Login successful!")
+           break
+       else:
+           logger.warning("Login stuck, retrying")
+           driver.refresh() # Refresh and try again if login failed
+
+    click_toolbar_button_by_layout_id(driver, '5028') # Click the time entry button
+    return driver
+
+def click_toolbar_button_by_layout_id(driver, layout_id, timeout=10):
     """
     Clicks a toolbar button based on its layoutId in the controlinit attribute.
 
@@ -49,7 +72,7 @@ def click_toolbar_button_by_layout_id(driver, layout_id, logger = None, timeout=
     except Exception as e:
         logger.error(f"Failed to click toolbar button with layoutId {layout_id}: {e}")
 
-def click_toolbar_button_timesheet_clear(driver, logger = None, timeout=10):
+def click_toolbar_button_timesheet_clear(driver, timeout=10):
     """
     Clicks a toolbar button based on its layoutId in the controlinit attribute.
 
@@ -69,7 +92,7 @@ def click_toolbar_button_timesheet_clear(driver, logger = None, timeout=10):
     except Exception as e:
         logger.error(f"Failed to click toolbar button with layoutId 5028: {e}")
 
-def click_toolbar_button_delete(driver, logger = None, timeout=10):
+def click_toolbar_button_delete(driver, timeout=10):
     xpath = f"//div[contains(@class, 'toolbutton') and contains(@controlinit, 'action:delete,refresheditbtns')]"
     try:
         button = WebDriverWait(driver, timeout).until(
@@ -90,7 +113,7 @@ def click_toolbar_button_delete(driver, logger = None, timeout=10):
     except Exception as e:
         logger.error(f"Failed to click toolbar button delete: {e}")
 
-def add_new_time_row(driver, logger = None):
+def add_new_time_row(driver):
     xpath = f"//div[@class = 'toolbutton new_without_data']"
     try:
         button = WebDriverWait(driver, 10).until(
