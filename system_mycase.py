@@ -11,6 +11,7 @@ from TimeEntry import TimeEntry as te
 import WebInteraction as wi
 from datetime import datetime
 import logging 
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,8 @@ class system_mycase(system_base):
 
     def get_data(self, attorney_name: str, file_reader = pd.read_csv):
         """Reads time data from a CSV file."""
-        path: str = attorney_name + '/current_time_report_final.csv'
+        path: str = attorney_name + '/user_time_report.csv' # Make file name match MyCase default file name
+        # path: str = attorney_name + '/current_time_report_final.csv'
         try:
             return file_reader(path)
         except Exception as e:
@@ -63,7 +65,7 @@ class system_mycase(system_base):
             while any(item.caseNum == case_number for item in time_list):
                 for index, item in enumerate(time_list):
                     if case_number in item.caseNum:
-                        item.saveEntry(False, attorney_name, logger)
+                        item.saveEntry(False, attorney_name)
                         del time_list[index]
                         break # break loop to begin search again
         except ValueError as ve:
@@ -90,16 +92,21 @@ class system_mycase(system_base):
         # We should eventually run out of items in time_list now, and we'll keep checking until that happens
         while any(time_list):
             for entry in time_list:
-                if entry.add_time_entry(driver) and not wi.check_for_error(driver):
-                    entry.saveEntry(True, attorney_name) # Save successful entry to file for logging
-                    time_list.pop(0) # remove successful element so we don't add twice
-                    break
+                # if entry.add_time_entry(driver) and not wi.check_for_error(driver):
+                if entry.add_time_entry(driver):
+                    if not wi.check_for_error(driver):
+                        entry.saveEntry(True, attorney_name) # Save successful entry to file for logging
+                        time_list.pop(0) # remove successful element so we don't add twice
+                        break
                 else:
                     # DONE: Add function to loop through data list and remove matching case number entries and add them to the failure list all at once
+                    time.sleep(.5)
                     self.remove_failed_entries(time_list, entry.caseNum, attorney_name)
-                    click_toolbar_button_delete(driver) # Delete the failed entry row
+                    time.sleep(.25)
+                    wi.click_toolbar_button_delete(driver) # Delete the failed entry row
+                    time.sleep(.25)
                     break # restart loop through time_list with all missing case time entries removed
 
         logger.info("All cases processed successfully! Please review success and failure time entries.")
         driver.close()
-        check_for_error(driver)
+        # check_for_error(driver)

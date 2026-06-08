@@ -14,7 +14,8 @@ class Task:
         # Code list format will be this: "Task Description string,tcodes index pos,ttypes index pos"
         mapped_codes = []
         taskCodes = ["In Court", "In Court Waiting", "Out Of Court"]
-        taskTypes = ["Case Development", "Discovery Review", "Hearing/Trial Prep", "Interview In Custody", "Interview Out of Custody", "Negotiations", "Other", "Research/Motions","Travel"]
+        taskTypes = ["Client Communication", "Client Communication In-Person", "Communication with Others", "Discovery Review", "Drafting Motions", "Hearing/Trial Prep", "Other", "Research","Travel Time"] # Updated available codes 3/9/26
+        # taskTypes = ["Case Development", "Discovery Review", "Hearing/Trial Prep", "Interview In Custody", "Interview Out of Custody", "Negotiations", "Other", "Research/Motions","Travel"]
         codes_filename = "task_codes.txt"
         try:
             open(codes_filename, "x", encoding="utf-8") # If file doesn't exist create one
@@ -40,12 +41,12 @@ class Task:
             logger.warning(f"\nTask code '{taskCode}' not found in existing codes. Please map it.")
             logger.info("Available Task Codes:")
             for idx, code in enumerate(taskCodes):
-                self.logger.info(f"{idx}: {code}")
+                logger.info(f"{idx}: {code}")
             code_index = input("Enter the index number for the appropriate Task Code: ")
             if code_index == '2': # If out of court, we need to map a task type as well
                 logger.info("Available Task Types:")
                 for idx, taskType in enumerate(taskTypes):
-                    self.logger.info(f"{idx}: {taskType}")
+                    logger.info(f"{idx}: {taskType}")
                 type_index = input("Enter the index number for the appropriate Task Type: ")
                 self.taskType = taskTypes[int(type_index)]
             else:

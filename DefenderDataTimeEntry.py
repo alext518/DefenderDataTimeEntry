@@ -10,6 +10,7 @@ from TimeEntry import TimeEntry as te
 from WebInteraction import *
 from Attorney import Attorney
 from DDActivity import DDActivity
+import WebInteraction
 import system_base_interface
 import system_mycase as sm
 import system_clio as sc
@@ -84,7 +85,7 @@ def remove_failed_entries(time_list: list[te], case_number: str, attorney: Attor
         while any(item.caseNum == case_number for item in time_list):
             for index, item in enumerate(time_list):
                 if case_number in item.caseNum:
-                    item.saveEntry(False, attorney)
+                    item.saveEntry(False, attorney.name)
                     del time_list[index]
                     break # break loop to begin search again
     except ValueError as ve:
@@ -108,11 +109,14 @@ def create_mycase_entry_files(attorney: Attorney) -> None:
 # Begin main script exectution
 # name = input("Enter attorney name (Shelby, Dane, or John): ").strip()
 
-Shelby = Attorney("Shelby", sm.system_mycase(""))
-# Dane = Attorney("Dane")
+# Shelby = Attorney("Shelby", sm.system_mycase(""))
+# Dane = Attorney("Dane", sm.system_mycase(""))
+Tom = Attorney("Tom", sm.system_mycase(""))
 # John = Attorney("John")
 
-attorneys = [Shelby]
+# attorneys = [Shelby]
+# attorneys = [Dane]
+attorneys = [Tom]
 for attorney in attorneys:
     data = attorney.system.get_data(attorney.name)
     attorney.system.parse(data, attorney.name, attorney.username, attorney.password)
@@ -121,47 +125,47 @@ for attorney in attorneys:
 #     print("Invalid attorney name. Please enter 'Shelby', 'Dane', or 'John'.")
 #     exit(1)
 # else:
-#     attorney = Attorney(name, logger = logger)
+#     attorney = Attorney(name, sm.system_mycase(""))
     
-if name == "John": # add time entries via Clio API
-    dd_activities = []
-    # Check current API Status
-    access_keys = get_access_keys(name, logger)
-    clio_api = ClioAPIHelper(access_keys[0], access_keys[1], attorney)
-    while True:
-        valid_token: bool = not clio_api.is_token_expired() and clio_api.is_token_valid()
-        if not valid_token:
-            clio_api.get_new_token()
-            continue # Start the while loop over to validate new token
+# if name == "John": # add time entries via Clio API
+#     dd_activities = []
+#     # Check current API Status
+#     access_keys = get_access_keys(name, logger)
+#     clio_api = ClioAPIHelper(access_keys[0], access_keys[1], attorney)
+#     while True:
+#         valid_token: bool = not clio_api.is_token_expired() and clio_api.is_token_valid()
+#         if not valid_token:
+#             clio_api.get_new_token()
+#             continue # Start the while loop over to validate new token
 
-        # Get activity data for provided dates
-        start_date = '2025-12-01' # hard-coding for easier debugging
-        end_date = '2025-12-31' # hard-coding for easier debugging
-        # start_date = input("Enter activity start date YYYY-MM-DD: ")
-        # end_date = input("Enter activity end date YYYY-MM-DD: ")
-        activities = ClioActivities(access_keys[0], access_keys[1], attorney, start_date, end_date, logger = logger)
-        print("Displaying activities in defender data format:")
-        for activity in activities.activities_data['data']:
-            activities.print_activity(activity)
-            date = activity['date'] if activity['date'] else "9/9/9999"                
-            task_code = ""
-            task_description = ""
-            case_number = activity['matter']['number'] if activity['matter'] else ""
-            duration = activity['quantity_in_hours'] if activity['quantity_in_hours'] else "0.0"
-            if activity['activity_description']:
-                if "out of court" in activity['activity_description']['name'].lower():
-                    task = activity['activity_description']['name'].split('-')
-                    task_code = task[0].strip()
-                    task_description = task[1].strip()
-                else:
-                    task_code = activity['activity_description']['name']
-            user = activity['user'] if activity['user'] else ""                
-            description = activity['note'] if activity['note'] else ""
-            dd_activities.append(DDActivity(date, case_number, duration, task_code, user, description, task_description))
-        input() # pause for testing
-        break # End program for testing
+#         # Get activity data for provided dates
+#         start_date = '2025-12-01' # hard-coding for easier debugging
+#         end_date = '2025-12-31' # hard-coding for easier debugging
+#         # start_date = input("Enter activity start date YYYY-MM-DD: ")
+#         # end_date = input("Enter activity end date YYYY-MM-DD: ")
+#         activities = ClioActivities(access_keys[0], access_keys[1], attorney, start_date, end_date, logger = logger)
+#         print("Displaying activities in defender data format:")
+#         for activity in activities.activities_data['data']:
+#             activities.print_activity(activity)
+#             date = activity['date'] if activity['date'] else "9/9/9999"                
+#             task_code = ""
+#             task_description = ""
+#             case_number = activity['matter']['number'] if activity['matter'] else ""
+#             duration = activity['quantity_in_hours'] if activity['quantity_in_hours'] else "0.0"
+#             if activity['activity_description']:
+#                 if "out of court" in activity['activity_description']['name'].lower():
+#                     task = activity['activity_description']['name'].split('-')
+#                     task_code = task[0].strip()
+#                     task_description = task[1].strip()
+#                 else:
+#                     task_code = activity['activity_description']['name']
+#             user = activity['user'] if activity['user'] else ""                
+#             description = activity['note'] if activity['note'] else ""
+#             dd_activities.append(DDActivity(date, case_number, duration, task_code, user, description, task_description))
+#         input() # pause for testing
+#         break # End program for testing
 # else: # add time entries via CSV file
-#     driver = wi.setup_webdriver(attorney) # Start webdriver
+#     driver = WebInteraction.setup_webdriver(attorney.username, attorney.password) # Start webdriver
 #     create_mycase_entry_files(attorney) # Create files if needed
 #     logger.info("Reading time sheet data from file...")
 #     time_data = read_time_data(get_time_data_path(attorney.name))
@@ -181,15 +185,15 @@ if name == "John": # add time entries via Clio API
 #     while any(time_list):
 #         for entry in time_list:
 #             if entry.add_time_entry(driver) and not check_for_error(driver):
-#                 entry.saveEntry(True, attorney, logger = logger) # Save successful entry to file for logging
+#                 entry.saveEntry(True, attorney.name) # Save successful entry to file for logging
 #                 time_list.pop(0) # remove successful element so we don't add twice
 #                 break
 #             else:
 #                 # DONE: Add function to loop through data list and remove matching case number entries and add them to the failure list all at once
 #                 remove_failed_entries(time_list, entry.caseNum, attorney)
-#                 click_toolbar_button_delete(driver, logger = logger) # Delete the failed entry row
+#                 click_toolbar_button_delete(driver) # Delete the failed entry row
 #                 break # restart loop through time_list with all missing case time entries removed
 
 #     logger.info("All cases processed successfully! Please review success and failure time entries.")
 #     driver.close()
-#     check_for_error(driver)
+    # check_for_error(driver)

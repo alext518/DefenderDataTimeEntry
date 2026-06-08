@@ -11,6 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>DefenderDataTimeEntry</Name>
     <RootNamespace>DefenderDataTimeEntry</RootNamespace>
+    <SuppressConfigureTestFrameworkPrompt>true</SuppressConfigureTestFrameworkPrompt>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -39,7 +40,6 @@
     <Compile Include="system_mycase.py" />
     <Compile Include="Task.py" />
     <Compile Include="TimeEntry.py" />
-    <Compile Include="twisted_web_server_test.py" />
     <Compile Include="WebInteraction.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />

@@ -40,7 +40,7 @@ def setup_webdriver(username, password):
     options.add_argument("--window-size=1500,500")
     options.add_experimental_option("detach", False)  # Keeps browser open after script ends
     driver = wd.Chrome(options=options)
-    driver.get('https://east.justiceworks.com/dd7/web/start/31053')  # Replace with actual URL
+    driver.get('https://east.justiceworks.com/dd7/web/start/31053')
     
     while True:
        if(login(driver, username, password)): # Call the login function after opening page
@@ -127,12 +127,15 @@ def add_new_time_row(driver):
 
 def check_for_error(driver):
     try:
-        html = driver.source()
-        validation_fail = html.find_element(By.CLASS_NAME, "dialogblocker")
-        if validation_fail.is_displayed():
-            close_button = validation_fail.find_element(By.TAG_NAME, "input")
-            close_button.click()
-            return True
+        # WebDriverWait(driver, 10).until(EC.alert_is_present())
+        alert = driver.switch_to.alert
+        alert.accept()
+        logger.info("Alert accepted.")
+        return True
+        # if validation_fail.is_displayed():
+        #     close_button = validation_fail.find_element(By.TAG_NAME, "input")
+        #     close_button.click()
+        #     return True
     except:
         return False
 
